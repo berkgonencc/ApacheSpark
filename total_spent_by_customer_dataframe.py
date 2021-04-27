@@ -4,6 +4,7 @@ from pyspark.sql.types import StructType, StructField, IntegerType, FloatType
 
 spark = SparkSession.builder.appName("TotalSpentByCustomer").getOrCreate()
 
+# Creating schema when reading customers-orders...
 schema = StructType([StructField("CustomerID", IntegerType(), True),\
                  StructField("ItemID", FloatType(), True),\
                  StructField("AmountSpent", FloatType(), True)])
@@ -16,13 +17,9 @@ df.printSchema()
 # Selecting columns we need..
 spentByCustomer = df.select("CustomerID", "AmountSpent")
 
-# Aggregate to find sum of amount spent..
+# Aggregate to find sum of amount spent and showing results..
 totalSpent = spentByCustomer.groupBy("CustomerID").agg(func.round(func.sum("AmountSpent"), 2).alias("TotalSpent")).orderBy("TotalSpent")
 
-# Collecting format and printing results..
-results = totalSpent.collect()
-
-for i in results:
-    print(str(i[0]) + ":\t" + str(i[1]))
+totalSpent.show(totalSpent.count())
 
 spark.stop()
